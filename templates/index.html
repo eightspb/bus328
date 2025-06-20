@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>bus328</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 20px; }
+    #map { height: 500px; width: 100%; }
+  </style>
+</head>
+<body>
+  <h1>Остановка: Рубежное шоссе, 14</h1>
+  <div id="eta">Загрузка ETA...</div>
+  <div id="map"></div>
+
+  <script>
+    async function updateETA() {
+      const res = await fetch("/eta");
+      const data = await res.json();
+      document.getElementById("eta").innerText = 
+        data.eta_minutes ? `Прибытие через ${data.eta_minutes} мин` : "Нет данных";
+    }
+
+    async function initMap() {
+      const map = L.map('map').setView([59.750917, 30.628973], 14);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      const stop = L.marker([59.750917, 30.628973]).addTo(map).bindPopup("Остановка");
+
+      const res = await fetch("/bus328");
+      const data = await res.json();
+      data.forEach(bus => {
+        L.marker([bus.latitude, bus.longitude]).addTo(map).bindPopup("bus 328");
+      });
+    }
+
+    updateETA();
+    initMap();
+    setInterval(updateETA, 30000);
+  </script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</body>
+</html>
